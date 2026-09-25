@@ -1,7 +1,8 @@
 import pandas as pd
 import json
 import requests
-
+import os
+import time
 
 base_URL = 'https://api.openf1.org/v1'
 
@@ -20,15 +21,28 @@ todo following that, pass the data through the model and actually train it."""
 session = requests.get(f"{base_URL}/sessions", params={"year": 2026, "session_name": "Race"})
 
 
-def fetch_laps(session_key)
+def get_stored(endpoint, params, cache_dir="cache"):
+    os.makedirs(cache_dir, exist_ok=True)#makes a directory, and doesn't crash if one is already there
+    key = endpoint + "_" + "_".join(f"{k}={v}" for k, v in sorted(params.items()))
+    path = os.path.join(cache_dir, key + ".json")#creates a path name to store data
+    if os.path.exists(path):#if that path exists, don't request from the API
+        return json.load(open(path))
+    r = requests.get(f"{base_URL}/{endpoint}", params = params)
+    r.raise_for_status()
+    data = r.json()
+    json.dump(data, open(path, "w"))
+    time.sleep(0.4)
+    return data
 
+session_key = 9158 #example!!   could loop through with a time.sleep to change session name.
+laps = get_stored("laps", {"session_key": session_key})
 
 def datahandling():
     #the session key is the session type(race, qualifying 1,2,3 etc...)
     #i will need the session key to understand if it's qualifying or race. get the weather and the track. will also need track times, possibly each segment?
     laps = pd.DataFrame(requests.get(f"{base_URL}/laps", params=))
 
-    weather = requests.get(f"{base_url}/weather", params=)
+    weather = requests.get(f"{base_URL}/weather", params=)
 
 #   weather(air temp, track temp, pressure, rainfall, wind_D, wind_S,
 #   Stints (Compound, Driver_number, session_key)
@@ -42,11 +56,14 @@ def datahandling():
 
     #todo: find what data points i need to get. lap time, track temp, etc....
 
+
 """so the weather is tracked each minute across the track. This means that the minute that the lap is started can be found to then search for the
 weather at that specific minute.
 
+
+IMPORTANT:
+    I will only need to do 3 or 4 specific requests as it can be done per session. so request eeverything from lap, stint and weather API branch, searching by session for each of them.
+    With this I can then create the dataset from that offline, without having to make hundreds of requests for each driver in each session.
+
+    
 """
-
-
-
-This is a test!!!
