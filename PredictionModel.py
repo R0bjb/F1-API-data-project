@@ -30,19 +30,24 @@ def get_stored(endpoint, params, cache_dir="cache"):
     r = requests.get(f"{base_URL}/{endpoint}", params = params)
     r.raise_for_status()
     data = r.json()
+    dataframe = pd.read_json('C:\CV Programming\F1 api programming folder\cache\laps_session_key=9158.json')
+    print(dataframe.to_string())
     json.dump(data, open(path, "w"))
     time.sleep(0.4)
+    #data_df = pd.dataframe(data)
     return data
 
-session_key = 9158 #example!!   could loop through with a time.sleep to change session name.
-laps = get_stored("laps", {"session_key": session_key})
+#def data_cleaning(data):
 
-def datahandling():
+
+
+
+#def datahandling():
     #the session key is the session type(race, qualifying 1,2,3 etc...)
     #i will need the session key to understand if it's qualifying or race. get the weather and the track. will also need track times, possibly each segment?
-    laps = pd.DataFrame(requests.get(f"{base_URL}/laps", params=))
+    #laps = pd.DataFrame(requests.get(f"{base_URL}/laps", params=))
 
-    weather = requests.get(f"{base_URL}/weather", params=)
+    #weather = requests.get(f"{base_URL}/weather", params=)
 
 #   weather(air temp, track temp, pressure, rainfall, wind_D, wind_S,
 #   Stints (Compound, Driver_number, session_key)
