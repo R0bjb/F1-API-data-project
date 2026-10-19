@@ -18,11 +18,12 @@ todo following that, pass the data through the model and actually train it."""
 
 #I think it will be a regression problem to predict all the times so find a good model for that, then get enough
 #data points to make the weather notable to the model so it actually looks at it when predicting.
-session = requests.get(f"{base_URL}/sessions", params={"year": 2026, "session_name": "Race"})
+#session = requests.get(f"{base_URL}/sessions", params={"year": 2026, "session_name": "Race"})
 
 
+#makes a directory and stores data based on the endpoint chosen(sessions, laps etc...
 def get_stored(endpoint, params, cache_dir="cache"):
-    os.makedirs(cache_dir, exist_ok=True)#makes a directory, and doesn't crash if one is already there
+    os.makedirs(cache_dir, exist_ok=True)#makes a directory, ignores error if directory exists
     key = endpoint + "_" + "_".join(f"{k}={v}" for k, v in sorted(params.items()))
     path = os.path.join(cache_dir, key + ".json")#creates a path name to store data
     if os.path.exists(path):#if that path exists, don't request from the API
@@ -30,8 +31,8 @@ def get_stored(endpoint, params, cache_dir="cache"):
     r = requests.get(f"{base_URL}/{endpoint}", params = params)
     r.raise_for_status()
     data = r.json()
-    dataframe = pd.read_json('C:\CV Programming\F1 api programming folder\cache\laps_session_key=9158.json')
-    print(dataframe.to_string())
+    #dataframe = pd.read_json('C:\CV Programming\F1 api programming folder\cache\laps_session_key=9158.json')
+    #print(dataframe.to_string())
     json.dump(data, open(path, "w"))
     time.sleep(0.4)
     #data_df = pd.dataframe(data)

@@ -16,7 +16,7 @@ def teamComparison():
     team1_points, team2_points = results(teams,team1,team2)
     create_graph(team1_points, team2_points, team1, team2, session_keys)
 def modeltraining():
-    session_key = 9160  # example!!   could loop through with a time.sleep to change session name.
+    session_key = 9166  # example!!   could loop through with a time.sleep to change session name.
     laps = get_stored("laps", {"session_key": session_key})
     weather = get_stored("weather", {"session_key": session_key})
     stints = get_stored("stints", {"session_key": session_key})
@@ -24,22 +24,27 @@ def modeltraining():
     laps_df = pd.DataFrame(laps)
     weather_df = pd.DataFrame(weather)
 
-    for df in (laps_df, weather_df):
-        df["date"] = pd.to_datetime(df.get("date_start", df.get("date")))
+    for df in (laps_df, weather_df):#adds a date column to both laps and weather dataframe, making it a pandas datetime datatype to merge
+        df["date"] = pd.to_datetime(df.get("date_start", df.get("date")), format = 'ISO8601')
 
+    #sorts both dataframes based on the dat
     laps_df = laps_df.sort_values("date")
     weather_df = weather_df.sort_values("date")
 
-    merged = pd.merge_asof(
+    laps_df = laps_df.dropna()
+    weather_df = weather_df.dropna()
+
+    merged = pd.merge_asof(#merge both laps and weather dataframe, using the date column.
         laps_df, weather_df,
         on = "date", direction="nearest",
         tolerance = pd.Timedelta("2min")
     )
+    print(merged.to_string())
 
 
 
-    #dataframe = pd.read_json('laps_session_key=9158.json')
-    #print (dataframe.to_string())
+    dataframe = pd.read_json('laps_session_key=9158.json')
+    print (dataframe.to_string())
 
 
 
