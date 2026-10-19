@@ -38,6 +38,20 @@ def get_stored(endpoint, params, cache_dir="cache"):
     #data_df = pd.dataframe(data)
     return data
 
+def clean_dataframes(laps, weather):#sorts both dataframes based on dates, then removes null values
+    laps_df = laps.sort_values("date")
+    weather_df = weather.sort_values("date")
+    laps_df = laps_df.dropna()
+    weather_df = weather_df.dropna()
+    return laps_df, weather_df
+
+def merge_weatherandlap(laps, weather):
+    merged = pd.merge_asof(  # merge both laps and weather dataframe, using the date column.
+        laps, weather,
+        on="date", direction="nearest",
+        tolerance=pd.Timedelta("2min")
+    )
+    return merged
 #def data_cleaning(data):
 
 

@@ -1,5 +1,5 @@
 from F1API import checkSession, store_dates, valid_team_list, team_validity_check, results, create_graph
-from PredictionModel import get_stored
+from PredictionModel import get_stored, clean_dataframes, merge_weatherandlap
 import pandas as pd
 
 machineLearning = True
@@ -27,19 +27,20 @@ def modeltraining():
     for df in (laps_df, weather_df):#adds a date column to both laps and weather dataframe, making it a pandas datetime datatype to merge
         df["date"] = pd.to_datetime(df.get("date_start", df.get("date")), format = 'ISO8601')
 
-    #sorts both dataframes based on the dat
-    laps_df = laps_df.sort_values("date")
-    weather_df = weather_df.sort_values("date")
+    laps_df, weather_df = clean_dataframes(laps_df, weather_df)
+    merged = merge_weatherandlap(laps_df, weather_df)
 
-    laps_df = laps_df.dropna()
-    weather_df = weather_df.dropna()
 
-    merged = pd.merge_asof(#merge both laps and weather dataframe, using the date column.
-        laps_df, weather_df,
-        on = "date", direction="nearest",
-        tolerance = pd.Timedelta("2min")
-    )
+
     print(merged.to_string())
+
+
+
+    #todo merge the stint dataframe so compounds can be added to the dataframe.
+
+
+    #todo add a track column, using the session endpoint. the trackID, or "circuit_short_name" would be good to have, then the model can differentiate tracks
+    #this might be possibly to add at a similar point each session is requested where a session_key is passed. simply add a request and get the track column to add to df or store for future use.
 
 
 
