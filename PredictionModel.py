@@ -52,6 +52,17 @@ def merge_weatherandlap(laps, weather):
         tolerance=pd.Timedelta("2min")
     )
     return merged
+def merge_stints(merged, stints):
+    #merge the latests df and stint df together, driver number and a lap column can be used. something will need to be done with the laps though
+    #because the master file uses specific lap number, whilst stint declares start lap and end lap of that stint. maybe do if lap_number is > start and < end.
+
+    merge = pd.merge_asof(
+        merged.sort_values("lap_number"), stints.sort_values("lap_start"),
+        by="driver_number", left_on="lap_number", right_on="lap_start",
+        direction = "backward" # the lap needs to be either an added column to each df. or an if statement checking for laps between lap start and end in stints
+    )
+    return merge
+
 #def data_cleaning(data):
 
 

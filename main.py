@@ -1,5 +1,5 @@
 from F1API import checkSession, store_dates, valid_team_list, team_validity_check, results, create_graph
-from PredictionModel import get_stored, clean_dataframes, merge_weatherandlap
+from PredictionModel import get_stored, clean_dataframes, merge_weatherandlap, merge_stints
 import pandas as pd
 
 machineLearning = True
@@ -23,32 +23,21 @@ def modeltraining():
 
     laps_df = pd.DataFrame(laps)
     weather_df = pd.DataFrame(weather)
+    stints_df = pd.DataFrame(stints)
+
 
     for df in (laps_df, weather_df):#adds a date column to both laps and weather dataframe, making it a pandas datetime datatype to merge
         df["date"] = pd.to_datetime(df.get("date_start", df.get("date")), format = 'ISO8601')
 
-    laps_df, weather_df = clean_dataframes(laps_df, weather_df)
-    merged = merge_weatherandlap(laps_df, weather_df)
-
-
+    laps_df, weather_df = clean_dataframes(laps_df, weather_df)#clean lap and weather dataframe
+    merged = merge_weatherandlap(laps_df, weather_df)   #merge weather and lap dataframe after cleaning
+    merged = merge_stints(merged, stints_df) #merge the stint dataframe with the previously merged lap and weather dataframe
 
     print(merged.to_string())
 
-
-
-    #todo merge the stint dataframe so compounds can be added to the dataframe.
-
+    #todo clean the most recent dataframe, there are a number of repeated columns such as meeting_key, session_key, and driver_number
 
     #todo add a track column, using the session endpoint. the trackID, or "circuit_short_name" would be good to have, then the model can differentiate tracks
-    #this might be possibly to add at a similar point each session is requested where a session_key is passed. simply add a request and get the track column to add to df or store for future use.
-
-
-
-    dataframe = pd.read_json('laps_session_key=9158.json')
-    print (dataframe.to_string())
-
-
-
 
 
 if teamComparisonCheck:
@@ -56,13 +45,3 @@ if teamComparisonCheck:
 if machineLearning:
     modeltraining()
 
-
-
-
-"""
-what's happened:
-
-originally I set the program up on one file to just understand APIs, creating a simple graph comparing two teams points across a season.
-after this, I decided to continue exploring APIs and stuff so set up a main in which all other functions were imported into.
-    Whilst doing this I discovered that importing items doesn't mean they only run when they are called, but instead run upon execution of the program. so
-    when some functions in another .py file is imported into main, if it has a print statement, this runs at the start, before it is intended to with the function call"""
