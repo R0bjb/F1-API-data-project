@@ -63,38 +63,15 @@ def merge_stints(merged, stints):
     )
     return merge
 
-#def data_cleaning(data):
+def drop_dupe_col(merged):
+    columns_toberemoved = ["meeting_key_x", "meeting_key_y", "session_key_x", "session_key_y"]
+    merged = merged.drop(columns_toberemoved, axis='columns')
+    return merged
 
 
-
-
-#def datahandling():
-    #the session key is the session type(race, qualifying 1,2,3 etc...)
-    #i will need the session key to understand if it's qualifying or race. get the weather and the track. will also need track times, possibly each segment?
-    #laps = pd.DataFrame(requests.get(f"{base_URL}/laps", params=))
-
-    #weather = requests.get(f"{base_URL}/weather", params=)
-
-#   weather(air temp, track temp, pressure, rainfall, wind_D, wind_S,
-#   Stints (Compound, Driver_number, session_key)
-#   Laps (lap_duration
-#   session(circuit_key, session_type)
-
-    # track, session_key, air temp, track temp, pressure, rainfall, wind_direction, wind_speed, compound, tyre_age, lap_duration, Driver Number
-    # some items will be stable for a lot of the data, but some things will change lap by lap, driver by driver. so creating the dataset with the drive number and
-    # start time will be useful to get to align it with the right weather and laptime data. then remove it before feeding to model
-
-
-    #todo: find what data points i need to get. lap time, track temp, etc....
-
-
-"""so the weather is tracked each minute across the track. This means that the minute that the lap is started can be found to then search for the
-weather at that specific minute.
-
-
-IMPORTANT:
-    I will only need to do 3 or 4 specific requests as it can be done per session. so request eeverything from lap, stint and weather API branch, searching by session for each of them.
-    With this I can then create the dataset from that offline, without having to make hundreds of requests for each driver in each session.
-
-    
-"""
+def merge_track(merged, sessions):
+    merge = pd.merge_asof(
+        merged, sessions,
+        on="session_key", direction = "nearest"
+    )
+    return merge

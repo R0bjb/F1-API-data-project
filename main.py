@@ -1,29 +1,32 @@
 from F1API import checkSession, store_dates, valid_team_list, team_validity_check, results, create_graph
-from PredictionModel import get_stored, clean_dataframes, merge_weatherandlap, merge_stints
+from PredictionModel import get_stored, clean_dataframes, merge_weatherandlap, merge_stints,drop_dupe_col, merge_track
 import pandas as pd
 
 machineLearning = True
 teamComparisonCheck = False
 
 
-def teamComparison():
-    teams = []
+def team_comparison():
     session = input("enter the year you want to check")
     meetings = checkSession(session)
     session_keys, dates, months = store_dates(meetings)#gets the months and dates
-    valid_teams = valid_team_list(session_keys)
+    valid_team_list(session_keys)
     team1, team2, teams = team_validity_check()
     team1_points, team2_points = results(teams,team1,team2)
     create_graph(team1_points, team2_points, team1, team2, session_keys)
-def modeltraining():
+def model_training():
     session_key = 9166  # example!!   could loop through with a time.sleep to change session name.
     laps = get_stored("laps", {"session_key": session_key})
     weather = get_stored("weather", {"session_key": session_key})
     stints = get_stored("stints", {"session_key": session_key})
+    sessions = get_stored("sessions", {"session_key": session_key})
 
     laps_df = pd.DataFrame(laps)
     weather_df = pd.DataFrame(weather)
     stints_df = pd.DataFrame(stints)
+    sessions = pd.DataFrame(sessions)
+
+
 
 
     for df in (laps_df, weather_df):#adds a date column to both laps and weather dataframe, making it a pandas datetime datatype to merge
@@ -32,16 +35,17 @@ def modeltraining():
     laps_df, weather_df = clean_dataframes(laps_df, weather_df)#clean lap and weather dataframe
     merged = merge_weatherandlap(laps_df, weather_df)   #merge weather and lap dataframe after cleaning
     merged = merge_stints(merged, stints_df) #merge the stint dataframe with the previously merged lap and weather dataframe
+    merged = drop_dupe_col(merged)
+    merged = merge_track(merged, sessions)
 
+
+    print(merged.columns)
     print(merged.to_string())
 
-    #todo clean the most recent dataframe, there are a number of repeated columns such as meeting_key, session_key, and driver_number
-
-    #todo add a track column, using the session endpoint. the trackID, or "circuit_short_name" would be good to have, then the model can differentiate tracks
 
 
 if teamComparisonCheck:
-    teamComparison()
+    team_comparison()
 if machineLearning:
-    modeltraining()
+    model_training()
 
