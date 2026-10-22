@@ -6,19 +6,9 @@ import time
 
 base_URL = 'https://api.openf1.org/v1'
 
-"""within this file, the prediction model will be developed.
 
---- random thought, it might be good to look at specific tracks. if using  metrics like wind direction and speed, they might be misleading
-with northerly winds greatly benefiting times in one track, and hindering times in another.
 
-todo create a dataframe from the API to feed into the training algorithm.
-todo once dataset is created, set up the test/train splits and all of that jazz
-todo after the test/train and dataset is all set up, set the model up with parameters etc.
-todo following that, pass the data through the model and actually train it."""
 
-#I think it will be a regression problem to predict all the times so find a good model for that, then get enough
-#data points to make the weather notable to the model so it actually looks at it when predicting.
-#session = requests.get(f"{base_URL}/sessions", params={"year": 2026, "session_name": "Race"})
 
 
 #makes a directory and stores data based on the endpoint chosen(sessions, laps etc...
@@ -75,3 +65,16 @@ def merge_track(merged, sessions):
         on="session_key", direction = "nearest"
     )
     return merge
+
+
+#todo remove bad rows of data. Removed out laps. Might need to remove cancelled races? This would probably be done in the main loop
+#each track might need to be seperated.
+
+
+def remove_bad_columns(dataset):
+    dataset = dataset.drop(columns=['date', 'meeting_key_x', 'date_start_y', 'date_end',
+                                    'country_key', 'gmt_offset', 'location', 'country_name', 'country_code'])
+    return dataset
+def remove_bad_rows(dataset):
+    dataset = dataset[~dataset['is_pit_out_lap'].isin([True])]
+    return dataset

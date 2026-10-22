@@ -1,5 +1,6 @@
 from F1API import checkSession, store_dates, valid_team_list, team_validity_check, results, create_graph
-from PredictionModel import get_stored, clean_dataframes, merge_weatherandlap, merge_stints,drop_dupe_col, merge_track
+from datacleaning_model import get_stored, clean_dataframes, merge_weatherandlap, merge_stints,drop_dupe_col, merge_track, remove_bad_columns, remove_bad_rows
+from Model_training import define_x_y, test_train_split, build_model
 import pandas as pd
 
 machineLearning = True
@@ -16,10 +17,10 @@ def team_comparison():
     create_graph(team1_points, team2_points, team1, team2, session_keys)
 def model_training():
     session_key = 9166  # example!!   could loop through with a time.sleep to change session name.
+    sessions = get_stored("sessions", {"session_key": session_key})
     laps = get_stored("laps", {"session_key": session_key})
     weather = get_stored("weather", {"session_key": session_key})
     stints = get_stored("stints", {"session_key": session_key})
-    sessions = get_stored("sessions", {"session_key": session_key})
 
     laps_df = pd.DataFrame(laps)
     weather_df = pd.DataFrame(weather)
@@ -38,10 +39,15 @@ def model_training():
     merged = drop_dupe_col(merged)
     merged = merge_track(merged, sessions)
 
+    cleaned = remove_bad_columns(merged)
+    cleaned = remove_bad_rows(cleaned)
+    print(cleaned.columns)
+    print(cleaned.to_string())
+    print(cleaned.shape)
 
-    print(merged.columns)
-    print(merged.to_string())
-
+    X, Y = define_x_y(cleaned)
+    X_train, X_test, y_train, y_test = test_train_split(X, Y)
+    y_pred = build_model(X_train, y_train, X_test)
 
 
 if teamComparisonCheck:
